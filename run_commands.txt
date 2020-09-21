@@ -1,0 +1,25 @@
+/home/p302036/bin/nextflow run /data/bioinfo-fehrmann/projects_loipf/kallisto_test/kallisto-nf/main.nf --kallisto --table /data/bioinfo-fehrmann/projects_loipf/kallisto_test/data/nf_sample_ftp.csv --index /data/bioinfo-fehrmann/projects_loipf/kallisto_test/data/kallisto_transcripts.idx -resume
+
+#SMALL
+curl ftp.sra.ebi.ac.uk/vol1/fastq/SRR331/008/SRR3317148/SRR3317148.fastq.gz > test.fastq.gz
+
+#BIG
+curl ftp.sra.ebi.ac.uk/vol1/fastq/ERR128/004/ERR1288734/ERR1288734.fastq.gz > test.fastq.gz
+
+
+
+nextflow run CGUTA/ANYseq --kallisto --table /data/bioinfo-fehrmann/projects_loipf/kallisto_test/data/nf_sample_ftp_part2.csv --index /data/bioinfo-fehrmann/projects_loipf/kallisto_test/data/kallisto_transcripts.idx -c /data/bioinfo-fehrmann/projects_loipf/kallisto_test/kallisto-nf/pg.config -resume
+
+
+rsync -avP /scratch/p302036/kallisto_run/processed/* /data/bioinfo-fehrmann/gado_rnaseq/kallisto_results/ 
+
+
+
+
+### extract .gff3 file unique transcript types
+cut -f 3 Homo_sapiens.GRCh38.101.gff3 | sort | uniq | grep "^[^#]" > unique_gene_types.txt
+
+### get unique gene ids 
+cut -d"," -f4 transcript_to_gene_list.csv | sort | uniq | wc -l
+
+

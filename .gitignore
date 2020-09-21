@@ -1,0 +1,24 @@
+# nextflow based files
+.git
+.nextflow*
+work
+results
+
+# other file formats
+*.pdf
+*.png
+*.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
