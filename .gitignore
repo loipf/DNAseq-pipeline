@@ -1,17 +1,18 @@
-# nextflow based files
-.git
-.nextflow*
+### data directories
 work
+data
 results
+
+### nextflow based files
+.nextflow*
 *.log
 
-
-# other file formats
+### other file formats
 *.pdf
 *.png
 *.html
 
-
+.git
 
 
 
