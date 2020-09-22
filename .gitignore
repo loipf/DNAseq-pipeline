@@ -3,6 +3,8 @@
 .nextflow*
 work
 results
+*.log
+
 
 # other file formats
 *.pdf
