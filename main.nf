@@ -11,10 +11,11 @@
 nextflow.enable.dsl=2
 
 include { 
-  DATA_ACQUISITION;
-  TEST;
-  PREPROCESS_READS;
-   } from './modules.nf' 
+    DATA_ACQUISITION;
+    TEST;
+    PREPROCESS_READS;
+	MULTIQC_READS
+} from './modules.nf' 
 
 
 
@@ -23,20 +24,29 @@ include {
 /*
  * default parameters
  */ 
-params.tool_dir   = "/home/stefan/tools"
-params.data_dir   = "$projectDir/data"
-params.reads   = "$projectDir/data/reads_raw/*/*_{1,2}.fastq.gz"
-params.scripts_dir    = "$projectDir/scripts"
-params.results_dir    = "$projectDir/results"
-params.num_threads = 3
+params.reads       = "$projectDir/test_reads_dir/*/*_{1,2}.fastq.gz"
+params.data_dir    = "$projectDir/data"
+params.scripts_dir = "$projectDir/scripts"
+params.results_dir = "$projectDir/results"
 
+
+/*
+ * tool paths
+ */ 
+params.tool_fastqc   = "/home/stefan/FastQC/fastqc"
+params.tool_cutadapt = "/home/stefan/.local/bin/cutadapt"
+params.tool_picard   = "/home/stefan/tools/picard.jar"
+params.tool_multiqc  = "/home/stefan/miniconda3/bin/multiqc"
+params.tool_samtools = "/home/stefan/tools/samtools-1.10/samtools"
+params.tool_bwa      = "/home/stefan/tools/bwa"
 
 
 /*
  * other parameters
  */
-params.ensembl_release = "101"
-params.adapter_seq_file = "$projectDir/data/adapter_seq.txt"
+params.num_threads      = 3
+params.ensembl_release  = "101"
+params.adapter_seq_file = "$projectDir/data/adapter_seq.tsv"
 
 
 
@@ -44,10 +54,9 @@ params.adapter_seq_file = "$projectDir/data/adapter_seq.txt"
 log.info """\
 DNA-SEQ PIPELINE
 ================================
-tool_dir : $params.tool_dir
-data_dir : $params.data_dir
-reads    : $params.reads
-results_dir  : $params.results_dir
+data_dir    : $params.data_dir
+reads       : $params.reads
+results_dir : $params.results_dir
 
 """
 
@@ -62,12 +71,12 @@ workflow {
             .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
 
 
-    DATA_ACQUISITION(params.data_dir, params.ensembl_release)
-    PREPROCESS_READS(params.data_dir, params.num_threads, channel_reads, params.adapter_seq_file)
+	DATA_ACQUISITION(params.data_dir, params.ensembl_release)
+	PREPROCESS_READS(params.data_dir+"/reads_test1/", channel_reads, params.tool_cutadapt, params.num_threads, params.adapter_seq_file)
+	//MULTIQC_READS(params.tool_dir, params.num_threads, PREPROCESS_READS.out.reads_preprocessed, params.adapter_seq_file)
 
+	//MULTIQC_READS( (params.data_dir+"/reads_raw/"), params.tool_dir, params.num_threads, channel_reads, params.adapter_seq_file)
 
- 
-    
 
 
 }

@@ -12,6 +12,7 @@ SAMTOOLS_VERSION="1.10"
 PICARD_VERSION="2.23.4"
 FASTQC_VERSION="v0.11.9"
 MULTIQC_VERSION="1.9"
+DEEPTOOLS_VERSION="3.5.0"
 
 
 
@@ -54,7 +55,14 @@ pip install multiqc==$MULTIQC_VERSION
 
 
 
+### DeepTools
+#wget https://github.com/deeptools/deepTools/archive/$DEEPTOOLS_VERSION.tar.gz
+#tar -xzvf $DEEPTOOLS_VERSION.tar.gz
+#rm -r $DEEPTOOLS_VERSION.tar.gz
+#cd deepTools-$DEEPTOOLS_VERSION
+#python setup.py install --prefix /User/Tools/deepTools2.0
 
+pip install deeptools==$DEEPTOOLS_VERSION
 
 
 

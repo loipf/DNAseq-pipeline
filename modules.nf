@@ -7,7 +7,7 @@ process DATA_ACQUISITION {
     path data_dir
     val ensembl_release
 
-   publishDir "$data_dir/", mode: 'copy'
+   storeDir "$data_dir/", mode: "copy"
 
   output:
     path "Homo_sapiens.GRCh38.dna.alt.fa.gz", emit: reference_genome
@@ -29,26 +29,57 @@ process PREPROCESS_READS {
 
   input:
     path data_dir
-    val num_threads
     tuple val(sample_id), path(reads) 
+    module tool_cutadapt
+    val num_threads
     path adapter_seq
 
-  publishDir "$data_dir/reads_preprocessed/", mode: 'copy', saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
+  publishDir "$data_dir/reads_preprocessed/", mode: "copy", saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
 
   output:
     tuple path("prepro_1.fastq.gz"), path("prepro_2.fastq.gz"), emit: reads_preprocessed 
+	file("cutadapt_output.txt")
 
   shell:
   '''
-    ADAPTER_5=$(cat !{adapter_seq} | sed -n 2p)  # forward
-    ADAPTER_3=$(cat !{adapter_seq} | sed -n 4p)  # reverse
+    ADAPTER_5=$(cat !{adapter_seq} | sed -n 1p | cut -f 2)  # forward
+    ADAPTER_3=$(cat !{adapter_seq} | sed -n 2p | cut -f 2)  # reverse
 
-    cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o prepro_1.fastq.gz -p prepro_2.fastq.gz !{reads}
+    !{tool_cutadapt} --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o prepro_1.fastq.gz -p prepro_2.fastq.gz !{reads} > cutadapt_output.txt
     
   '''
 }
 
 
+
+
+process MULTIQC_READS { 
+
+  input:
+	path read_dir
+    path tool_dir
+    val num_threads
+    tuple val(sample_id), path(reads) 
+    path adapter_seq
+
+	//publishDir "$parent", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
+	//publishDir "$reads.parent", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
+	publishDir "$read_dir/$sample_id", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
+
+  output:
+    //tuple path("1_fastqc.zip"), path("2_fastqc.zip")
+	file("multiqc_test.txt")
+
+
+  shell:
+  '''
+	echo !{read_dir} > multiqc_test.txt
+	#!{tool_dir}/FastQC/fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads}
+	
+  '''
+}
+
+    
 
 
 
