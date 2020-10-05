@@ -23,3 +23,8 @@ cut -f 3 Homo_sapiens.GRCh38.101.gff3 | sort | uniq | grep "^[^#]" > unique_gene
 cut -d"," -f4 transcript_to_gene_list.csv | sort | uniq | wc -l
 
 
+
+
+
+-with-timeline report_time -with-report report_summary
+

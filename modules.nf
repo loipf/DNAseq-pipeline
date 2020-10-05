@@ -2,12 +2,12 @@
 
 
 process DATA_ACQUISITION { 
+  storeDir "$data_dir/", mode: "copy"
  
   input:
     path data_dir
     val ensembl_release
 
-   storeDir "$data_dir/", mode: "copy"
 
   output:
     path "Homo_sapiens.GRCh38.dna.alt.fa.gz", emit: reference_genome
@@ -26,6 +26,7 @@ process DATA_ACQUISITION {
 
 
 process PREPROCESS_READS { 
+  publishDir "$data_dir/reads_preprocessed/", mode: "copy", saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
 
   input:
     path data_dir
@@ -34,11 +35,10 @@ process PREPROCESS_READS {
     val num_threads
     path adapter_seq
 
-  publishDir "$data_dir/reads_preprocessed/", mode: "copy", saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
 
   output:
     tuple path("prepro_1.fastq.gz"), path("prepro_2.fastq.gz"), emit: reads_preprocessed 
-	file("cutadapt_output.txt")
+	path("cutadapt_output.txt")
 
   shell:
   '''
@@ -54,6 +54,9 @@ process PREPROCESS_READS {
 
 
 process MULTIQC_READS { 
+	//publishDir "$parent", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
+	//publishDir "$reads.parent", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
+	publishDir "$read_dir/$sample_id", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
 
   input:
 	path read_dir
@@ -62,13 +65,10 @@ process MULTIQC_READS {
     tuple val(sample_id), path(reads) 
     path adapter_seq
 
-	//publishDir "$parent", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
-	//publishDir "$reads.parent", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
-	publishDir "$read_dir/$sample_id", mode: "copy",  saveAs: { filename -> "${sample_id}_$filename" }
 
   output:
     //tuple path("1_fastqc.zip"), path("2_fastqc.zip")
-	file("multiqc_test.txt")
+	path("multiqc_test.txt")
 
 
   shell:
@@ -86,12 +86,13 @@ process MULTIQC_READS {
 
 
 process MAPPING_BWA { 
+  publishDir "$data_dir/reads_mapped/", mode: 'copy'
+
   input:
     path data_dir
     path tool_dir
     path reference_genome
 
-   publishDir "$data_dir/reads_mapped/", mode: 'copy'
 
   output:
     path "Homo_sapiens.GRCh38.dna.alt.fa.gz", emit: reference_genome
@@ -123,15 +124,15 @@ process MAPPING_BWA {
 
 
 process TEST { 
+  publishDir "$data_dir/", mode: 'copy'
  
   input:
     path data_dir
     path reference_genome
 
-  publishDir "$data_dir/", mode: 'copy'
 
   output:
-    file "test_file.txt"
+    path "test_file.txt"
 
 
   shell:

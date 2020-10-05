@@ -41,7 +41,7 @@ cd $TOOL_DIR
 
 
 ### picard
-wget https://github.com/broadinstitute/picard/releases/download/$PICARD_VERSION/picard.jar
+#wget https://github.com/broadinstitute/picard/releases/download/$PICARD_VERSION/picard.jar
 
 
 ### FastQC

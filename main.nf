@@ -20,33 +20,35 @@ include {
 
 
 
-
 /*
  * default parameters
  */ 
-params.reads       = "$projectDir/test_reads_dir/*/*_{1,2}.fastq.gz"
-params.data_dir    = "$projectDir/data"
-params.scripts_dir = "$projectDir/scripts"
-params.results_dir = "$projectDir/results"
+
+params.dev = true
+
+params.reads		= "$projectDir/test_reads_dir/*/*_{1,2}.fastq.gz"
+params.data_dir		= "$projectDir/data"
+params.scripts_dir	= "$projectDir/scripts"
+params.results_dir	= "$projectDir/results"
 
 
 /*
  * tool paths
  */ 
-params.tool_fastqc   = "/home/stefan/FastQC/fastqc"
-params.tool_cutadapt = "/home/stefan/.local/bin/cutadapt"
-params.tool_picard   = "/home/stefan/tools/picard.jar"
-params.tool_multiqc  = "/home/stefan/miniconda3/bin/multiqc"
-params.tool_samtools = "/home/stefan/tools/samtools-1.10/samtools"
-params.tool_bwa      = "/home/stefan/tools/bwa"
+params.tool_fastqc		= "/home/stefan/FastQC/fastqc"
+params.tool_cutadapt	= "/home/stefan/.local/bin/cutadapt"
+params.tool_multiqc		= "/home/stefan/miniconda3/bin/multiqc"
+params.tool_samtools	= "/home/stefan/tools/samtools-1.10/samtools"
+params.tool_bwa			= "/home/stefan/tools/bwa"
+params.tool_deeptools	= "/home/stefan/miniconda3/bin/deeptools"
 
 
 /*
  * other parameters
  */
-params.num_threads      = 3
-params.ensembl_release  = "101"
-params.adapter_seq_file = "$projectDir/data/adapter_seq.tsv"
+params.num_threads		= 3
+params.ensembl_release	= "101"
+params.adapter_seq_file	= "$projectDir/data/adapter_seq.tsv"
 
 
 
@@ -68,7 +70,9 @@ results_dir : $params.results_dir
 workflow {
     channel_reads = Channel
             .fromFilePairs( params.reads )
-            .ifEmpty { error "Cannot find any reads matching: ${params.reads}" }
+            .ifEmpty { error "cannot find any reads matching: ${params.reads}" }
+			.take( params.dev ? 2 : -1 )  // only consider 2 files for debugging
+
 
 
 	DATA_ACQUISITION(params.data_dir, params.ensembl_release)

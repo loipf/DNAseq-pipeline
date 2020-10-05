@@ -72,7 +72,7 @@ do
     ### mapping process
     ### TODO remove duplicates markdup -r?
     ### TODO disable proper pair check fixmate -p ?
-	### TODO check multiple threads add up ? 
+	### TODO check multiple threads add up - could lead to crash ? 
     mkdir -p $out_dir/data/reads_mapped/$sample_id
     cd $out_dir/data/reads_mapped/$sample_id
     $tool_bwa mem -Y -t $num_threads -K 100000000 $out_dir/data/BWA_index/Homo_sapiens.GRCh38.dna.alt.fa.gz $read_files_prepro \
@@ -117,7 +117,7 @@ bamPEFragmentSize -p $num_threads --bamfiles $read_files_mapped --table $out_dir
 estimateReadFiltering -p $num_threads --smartLabels --bamfiles $read_files_mapped > $out_dir/data/reads_mapped/_deepTools/estimateReadFiltering_output.tsv
 
 ### need BED files
-plotEnrichment -p $num_threads --smartLabels --bamfiles $read_files_mapped --outRawCounts $out_dir/data/reads_mapped/_deepTools/plotEnrichment_rawCounts.tsv
+#plotEnrichment -p $num_threads --smartLabels --bamfiles $read_files_mapped --outRawCounts $out_dir/data/reads_mapped/_deepTools/plotEnrichment_rawCounts.tsv
 
 multiqc -f -o $out_dir/data/quality_reports/reads_raw $out_dir/data/reads_raw
 multiqc -f -o $out_dir/data/quality_reports/reads_prepro $out_dir/data/reads_prepro
