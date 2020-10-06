@@ -11,9 +11,11 @@
 nextflow.enable.dsl=2
 
 include { 
-    DATA_ACQUISITION;
-    TEST;
-    PREPROCESS_READS;
+	CREATE_FOLDER_STRUCTURE;
+	DATA_ACQUISITION;
+	CREATE_BWA_INDEX;
+	TEST;
+	PREPROCESS_READS;
 	MULTIQC_READS
 } from './modules.nf' 
 
@@ -29,7 +31,6 @@ params.dev = true
 params.reads		= "$projectDir/test_reads_dir/*/*_{1,2}.fastq.gz"
 params.data_dir		= "$projectDir/data"
 params.scripts_dir	= "$projectDir/scripts"
-params.results_dir	= "$projectDir/results"
 
 
 /*
@@ -39,7 +40,7 @@ params.tool_fastqc		= "/home/stefan/FastQC/fastqc"
 params.tool_cutadapt	= "/home/stefan/.local/bin/cutadapt"
 params.tool_multiqc		= "/home/stefan/miniconda3/bin/multiqc"
 params.tool_samtools	= "/home/stefan/tools/samtools-1.10/samtools"
-params.tool_bwa			= "/home/stefan/tools/bwa"
+params.tool_bwa 		= "/home/stefan/tools/bwa/bwa"
 params.tool_deeptools	= "/home/stefan/miniconda3/bin/deeptools"
 
 
@@ -49,6 +50,7 @@ params.tool_deeptools	= "/home/stefan/miniconda3/bin/deeptools"
 params.num_threads		= 3
 params.ensembl_release	= "101"
 params.adapter_seq_file	= "$projectDir/data/adapter_seq.tsv"
+params.reference_genome	= "$projectDir/data/Homo_sapiens.GRCh38.dna.alt.fa.gz"
 
 
 
@@ -56,9 +58,8 @@ params.adapter_seq_file	= "$projectDir/data/adapter_seq.tsv"
 log.info """\
 DNA-SEQ PIPELINE
 ================================
-data_dir    : $params.data_dir
-reads       : $params.reads
-results_dir : $params.results_dir
+reads		: $params.reads
+data_dir	: $params.data_dir
 
 """
 
@@ -68,15 +69,20 @@ results_dir : $params.results_dir
  * main pipeline logic
  */
 workflow {
-    channel_reads = Channel
-            .fromFilePairs( params.reads )
-            .ifEmpty { error "cannot find any reads matching: ${params.reads}" }
+	channel_reads = Channel
+			.fromFilePairs( params.reads )
+			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
 			.take( params.dev ? 2 : -1 )  // only consider 2 files for debugging
 
 
+	CREATE_FOLDER_STRUCTURE(params.data_dir)
 
-	DATA_ACQUISITION(params.data_dir, params.ensembl_release)
-	PREPROCESS_READS(params.data_dir+"/reads_test1/", channel_reads, params.tool_cutadapt, params.num_threads, params.adapter_seq_file)
+	//DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
+
+	CREATE_BWA_INDEX(params.tool_bwa, params.reference_genome)
+
+	//PREPROCESS_READS(params.data_dir+"/reads_test1/", channel_reads, params.tool_cutadapt, params.num_threads, params.adapter_seq_file)
+
 	//MULTIQC_READS(params.tool_dir, params.num_threads, PREPROCESS_READS.out.reads_preprocessed, params.adapter_seq_file)
 
 	//MULTIQC_READS( (params.data_dir+"/reads_raw/"), params.tool_dir, params.num_threads, channel_reads, params.adapter_seq_file)
@@ -92,9 +98,9 @@ workflow {
 * params.dev = false
 * params.number_of_inputs = 2
 * Channel
-*    .from(1..300)
-*    .take( params.dev ? params.number_of_inputs : -1 )
-*    .println() 
+*	.from(1..300)
+*	.take( params.dev ? params.number_of_inputs : -1 )
+*	.println() 
 */
 
 

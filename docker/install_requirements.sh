@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 ### maybe set up everything with bioconda ? - dont know if they have newest versions
 ### export tool-pathes to .bashrc ?
 
 
-TOOL_DIR="/home/stefan/tools/"
+TOOL_DIR="tools/"
 
 BWA_VERSION="v0.7.17"
 CUTADAPT_VERSION="2.10"
@@ -63,6 +63,8 @@ pip install multiqc==$MULTIQC_VERSION
 #python setup.py install --prefix /User/Tools/deepTools2.0
 
 pip install deeptools==$DEEPTOOLS_VERSION
+
+
 
 
 
