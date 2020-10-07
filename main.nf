@@ -8,6 +8,7 @@
 /* 
  * import modules 
  */
+
 nextflow.enable.dsl=2
 
 include { 
@@ -34,21 +35,10 @@ params.scripts_dir	= "$projectDir/scripts"
 
 
 /*
- * tool paths
- */ 
-params.tool_fastqc		= "/home/stefan/FastQC/fastqc"
-params.tool_cutadapt	= "/home/stefan/.local/bin/cutadapt"
-params.tool_multiqc		= "/home/stefan/miniconda3/bin/multiqc"
-params.tool_samtools	= "/home/stefan/tools/samtools-1.10/samtools"
-params.tool_bwa 		= "/home/stefan/tools/bwa/bwa"
-params.tool_deeptools	= "/home/stefan/miniconda3/bin/deeptools"
-
-
-/*
  * other parameters
  */
+
 params.num_threads		= 3
-params.ensembl_release	= "101"
 params.adapter_seq_file	= "$projectDir/data/adapter_seq.tsv"
 params.reference_genome	= "$projectDir/data/Homo_sapiens.GRCh38.dna.alt.fa.gz"
 
@@ -79,9 +69,9 @@ workflow {
 
 	//DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
 
-	CREATE_BWA_INDEX(params.tool_bwa, params.reference_genome)
+	CREATE_BWA_INDEX(params.reference_genome)
 
-	//PREPROCESS_READS(params.data_dir+"/reads_test1/", channel_reads, params.tool_cutadapt, params.num_threads, params.adapter_seq_file)
+	PREPROCESS_READS(channel_reads, params.num_threads, params.adapter_seq_file)
 
 	//MULTIQC_READS(params.tool_dir, params.num_threads, PREPROCESS_READS.out.reads_preprocessed, params.adapter_seq_file)
 

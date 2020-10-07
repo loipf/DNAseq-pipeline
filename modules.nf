@@ -20,7 +20,7 @@ process CREATE_FOLDER_STRUCTURE {
 }
 
 
-
+// maybe outsource this script to simple bash 
 process DATA_ACQUISITION { 
 	storeDir params.data_dir, mode: "copy"
 
@@ -47,37 +47,29 @@ process CREATE_BWA_INDEX {
 	publishDir "$params.data_dir/BWA_index", mode: "copy"
 
 	input:
-		path tool_bwa
 		path reference_genome
 
 	output:
-		path "test_file.txt"
-		//path "*.{amb,ann,bwt,pac,sa}", emit: bwa_index_bwamem
+		path "*.{amb,ann,bwt,pac,sa}", emit: bwa_index
 
 	shell:
 	'''
-	!{tool_bwa} > test_file.txt # index !{reference_genome}
+	bwa index !{reference_genome} 
 	'''
 }
 	
 
 
-
-
-
 process PREPROCESS_READS { 
-	publishDir "$data_dir/reads_preprocessed/", mode: "copy", saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
+	publishDir "$params.data_dir/reads_prepro/", mode: "copy", saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
 
 	input:
-		path data_dir
 		tuple val(sample_id), path(reads) 
-		path tool_cutadapt
 		val num_threads
 		path adapter_seq
 
-
 	output:
-		tuple path("prepro_1.fastq.gz"), path("prepro_2.fastq.gz"), emit: reads_preprocessed 
+		tuple path("prepro_1.fastq.gz"), path("prepro_2.fastq.gz"), emit: reads_prepro
 		path("cutadapt_output.txt")
 
 	shell:
@@ -85,7 +77,7 @@ process PREPROCESS_READS {
 	ADAPTER_5=$(cat !{adapter_seq} | sed -n 1p | cut -f 2)  # forward
 	ADAPTER_3=$(cat !{adapter_seq} | sed -n 2p | cut -f 2)  # reverse
 
-	!{tool_cutadapt} --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o prepro_1.fastq.gz -p prepro_2.fastq.gz !{reads} > cutadapt_output.txt
+	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o prepro_1.fastq.gz -p prepro_2.fastq.gz !{reads} > cutadapt_output.txt
 
 	'''
 }

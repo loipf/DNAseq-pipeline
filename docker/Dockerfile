@@ -1,10 +1,10 @@
-FROM conda/miniconda3:latest
+FROM conda/miniconda3@sha256:2141bfc4b60cc5eb332402207c80d884daa72fcefa48b50f3ccadd934d1f3d03
 
 MAINTAINER loipf
 
-RUN apt-get update && apt-get install -y curl 
+#RUN apt-get update 
+#RUN conda update --all
 
-RUN conda update --all
 RUN conda config --add channels defaults
 RUN conda config --add channels bioconda
 RUN conda config --add channels conda-forge
@@ -19,15 +19,7 @@ RUN conda install \
 		samtools==1.11.0 \
 		cutadapt==2.10
 
-### nextflow
-RUN curl -fsSL https://get.nextflow.io | bash
 
-
-# sudo docker build .
-# sudo docker run --name test ad0077dfbe3e
-# sudo docker stop test
-# sudo docker rm test
-# sudo docker ps
 
 
 
