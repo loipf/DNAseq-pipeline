@@ -61,7 +61,7 @@ process CREATE_BWA_INDEX {
 
 
 process PREPROCESS_READS { 
-	publishDir "$params.data_dir/reads_prepro/", mode: "copy", saveAs: { filename -> "${sample_id}/${sample_id}_$filename" }
+	publishDir "$params.data_dir/reads_prepro/", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
 		tuple val(sample_id), path(reads) 
@@ -69,7 +69,7 @@ process PREPROCESS_READS {
 		path adapter_seq
 
 	output:
-		tuple path("prepro_1.fastq.gz"), path("prepro_2.fastq.gz"), emit: reads_prepro
+		tuple val(sample_id), path("${sample_id}_prepro_1.fastq.gz"), path("${sample_id}_prepro_2.fastq.gz"), emit: reads_prepro
 		path("cutadapt_output.txt")
 
 	shell:
@@ -77,45 +77,58 @@ process PREPROCESS_READS {
 	ADAPTER_5=$(cat !{adapter_seq} | sed -n 1p | cut -f 2)  # forward
 	ADAPTER_3=$(cat !{adapter_seq} | sed -n 2p | cut -f 2)  # reverse
 
-	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o prepro_1.fastq.gz -p prepro_2.fastq.gz !{reads} > cutadapt_output.txt
+	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > cutadapt_output.txt
 
 	'''
 }
 
 
 
-
-process MULTIQC_READS { 
-	//publishDir "$parent", mode: "copy", saveAs: { filename -> "${sample_id}_$filename" }
-	//publishDir "$reads.parent", mode: "copy", saveAs: { filename -> "${sample_id}_$filename" }
-	publishDir "$read_dir/$sample_id", mode: "copy", saveAs: { filename -> "${sample_id}_$filename" }
+// not possible to run dynamically fastqc with same name
+// FASTQC PROCESS WORK BUT VERY PATCHED - does not recreate if deleted and nextflow resumed et
+process FASTQC_READS_RAW { 
+	publishDir "$params.data_dir/reads_raw", mode: "copy" 
 
 	input:
-		path read_dir
-		path tool_dir
-		val num_threads
 		tuple val(sample_id), path(reads) 
+		val num_threads
 		path adapter_seq
 
+	//output:
+		//path "*.{html,zip}"
 
-	output:
-		//tuple path("1_fastqc.zip"), path("2_fastqc.zip")
-	path("multiqc_test.txt")
+	script:
+	'''
+	mkdir -p !{params.data_dir}/reads_raw/!{sample_id}
+	fastqc -a !{adapter_seq} -t !{num_threads} --outdir !{params.data_dir}/reads_raw/!{sample_id} --noextract !{reads}
+	'''
+}
 
+
+
+process FASTQC_READS_PREPRO { 
+	publishDir "$params.data_dir/reads_prepro", mode: "copy"
+
+	input:
+		tuple val(sample_id), path(reads) 
+		val num_threads
+		path adapter_seq
 
 	shell:
 	'''
-	echo !{read_dir} > multiqc_test.txt
-	#!{tool_dir}/FastQC/fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads}
-	
+	mkdir -p !{params.data_dir}/reads_prepro/!{sample_id}
+	fastqc -a !{adapter_seq} -t !{num_threads} --outdir !{params.data_dir}/reads_prepro/!{sample_id} --noextract !{reads}
 	'''
 }
+
+
+
 
 
 
 
 process MAPPING_BWA { 
-	publishDir "$data_dir/reads_mapped/", mode: 'copy'
+	publishDir "$params.data_dir/reads_mapped/", mode: 'copy'
 
 	input:
 		path data_dir
@@ -150,32 +163,43 @@ process MAPPING_BWA {
 
 
 
-
+//.map{ file -> tuple(file[0], file)}
 
 process TEST { 
-	publishDir "$data_dir/", mode: 'copy'
+	publishDir "$params.data_dir/test", mode: 'copy'
  
 	input:
-		path data_dir
-		path reference_genome
-
+		tuple val(sample_id), path(reads) 
 
 	output:
-		path "test_file.txt"
+		tuple val(sample_id), path("test_1.fastq.txt"), path("test_2.fastq.txt"), emit: reads_prepro
 
 
 	shell:
 	"""
-	head !{reference_genome} > test_file.txt
-
+	echo !{sample_id} > test_1.fastq.txt
+	echo !{sample_id} > test_2.fastq.txt
 	"""
 }
 
 
+process TEST2 { 
+	publishDir "$params.data_dir/test2", mode: 'copy'
+ 
+	input:
+		tuple val(sample_id), path(reads) 
 
+	output:
+		path "${sample_id}" 
+		//path("test2_1.fastq.txt")
+		//path("test2_2.fastq.txt")
 
-
-
+	shell:
+	"""
+	echo !{sample_id} > test2_1.fastq.txt
+	echo !{reads} > test2_2.fastq.txt
+	"""
+}
 
 
 
