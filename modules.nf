@@ -5,24 +5,9 @@ params.data_dir	= "$projectDir/data"
 
 
 
-process CREATE_FOLDER_STRUCTURE {
-
-	input:
-		path data_dir
-
-	shell:
-	'''
-	mkdir -p !{data_dir}
-	mkdir -p !{data_dir}/reads_raw
-	mkdir -p !{data_dir}/reads_prepro
-	'''
-
-}
-
-
 // maybe outsource this script to simple bash 
 process DATA_ACQUISITION { 
-	storeDir params.data_dir, mode: "copy"
+	storeDir params.data_dir, mode: "copy"  // DOES NOT WORK
 
 	input:
 		path data_dir
@@ -44,7 +29,7 @@ process DATA_ACQUISITION {
 
 
 process CREATE_BWA_INDEX { 
-	publishDir "$params.data_dir/BWA_index", mode: "copy"
+	publishDir "$params.data_dir/bwa_index", mode: "copy"
 
 	input:
 		path reference_genome
@@ -61,7 +46,8 @@ process CREATE_BWA_INDEX {
 
 
 process PREPROCESS_READS { 
-	publishDir "$params.data_dir/reads_prepro/", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
+	tag "cutadapt on $sample_id"
+	publishDir "$params.data_dir/reads_prepro", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
 		tuple val(sample_id), path(reads) 
@@ -70,7 +56,7 @@ process PREPROCESS_READS {
 
 	output:
 		tuple val(sample_id), path("${sample_id}_prepro_1.fastq.gz"), path("${sample_id}_prepro_2.fastq.gz"), emit: reads_prepro
-		path("cutadapt_output.txt")
+		path "cutadapt_output.txt"
 
 	shell:
 	'''
@@ -85,67 +71,81 @@ process PREPROCESS_READS {
 
 
 // not possible to run dynamically fastqc with same name
-// FASTQC PROCESS WORK BUT VERY PATCHED - does not recreate if deleted and nextflow resumed et
 process FASTQC_READS_RAW { 
-	publishDir "$params.data_dir/reads_raw", mode: "copy" 
+	tag "fastqc_raw on $sample_id"
+	publishDir "$params.data_dir/reads_raw", mode: "copy", overwrite: false, saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
 		tuple val(sample_id), path(reads) 
 		val num_threads
 		path adapter_seq
 
-	//output:
-		//path "*.{html,zip}"
+	output:
+		path "*.zip"
+		path "*.html"
 
-	script:
+	shell:
 	'''
-	mkdir -p !{params.data_dir}/reads_raw/!{sample_id}
-	fastqc -a !{adapter_seq} -t !{num_threads} --outdir !{params.data_dir}/reads_raw/!{sample_id} --noextract !{reads}
+	fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads}
 	'''
 }
 
 
 
 process FASTQC_READS_PREPRO { 
-	publishDir "$params.data_dir/reads_prepro", mode: "copy"
+	tag "fastqc_prepro on $sample_id"
+	publishDir "$params.data_dir/reads_prepro", mode: "copy", overwrite: false, saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
 		tuple val(sample_id), path(reads) 
 		val num_threads
 		path adapter_seq
 
+	output:
+		path "*.zip"
+		path "*.html"
+
 	shell:
 	'''
-	mkdir -p !{params.data_dir}/reads_prepro/!{sample_id}
-	fastqc -a !{adapter_seq} -t !{num_threads} --outdir !{params.data_dir}/reads_prepro/!{sample_id} --noextract !{reads}
+	fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads}
 	'''
 }
 
 
 
 
-
-
-
 process MAPPING_BWA { 
-	publishDir "$params.data_dir/reads_mapped/", mode: 'copy'
+	tag "bwa mapping on $sample_id"
+	publishDir "$params.data_dir/reads_mapped", mode: 'copy', saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
-		path data_dir
-		path tool_dir
+		tuple val(sample_id), path(reads) 
+		val num_threads
 		path reference_genome
+		path bwa_index  // to ensure index is created
 
 
 	output:
-		path "Homo_sapiens.GRCh38.dna.alt.fa.gz", emit: reference_genome
+		path "${sample_id}.bam", emit: reads_mapped
+		path "${sample_id}_stats.txt"
+		path "*"
+		//path "${sample_id}_markup_stats.txt"  // problems saving
+		//path "${sample_id}.bam.ai"
 
 
 	shell:
-	"""
-	curl ftp://ftp.ensembl.org/pub/release-!{ensembl_release}/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.MT.fa.gz > Homo_sapiens.GRCh38.dna.alt.fa.gz
+	'''
+	bwa mem -Y -t !{num_threads} -K 100000000 !{reference_genome} !{reads} \
+	| samtools view -@ !{num_threads} -h -b - \
+    | samtools sort -n -@ !{num_threads} - \
+	| samtools fixmate -m -@ !{num_threads} - - \
+	| samtools sort -@ !{num_threads} - \
+	| samtools markdup -@ !{num_threads} -f !{sample_id}_markdup_stats.txt - !{sample_id}.bam
 
+	samtools index -b -@ !{num_threads} !{sample_id}.bam
+	samtools stats -@ !{num_threads} !{sample_id}.bam > !{sample_id}_stats.txt
 
-	"""
+	'''
 }
 
 
