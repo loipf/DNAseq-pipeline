@@ -18,6 +18,7 @@ include {
 	FASTQC_READS_RAW;
 	FASTQC_READS_PREPRO;
 	MAPPING_BWA;
+	DEEPTOOLS_ANALYSIS;
 	TEST;
 	TEST2
 } from './modules.nf' 
@@ -64,7 +65,7 @@ workflow {
 	channel_reads = Channel
 			.fromFilePairs( params.reads )
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
-			.take( params.dev ? 1 : -1 )  // only consider 2 files for debugging
+			.take( params.dev ? 2 : -1 )  // only consider 2 files for debugging
 
 	//channel_reads = Channel
 	//		.from( [["id1","read1","read2"], ["id2","read1","read2"]])
@@ -82,6 +83,9 @@ workflow {
 	FASTQC_READS_PREPRO(channel_reads_prepro, params.num_threads, params.adapter_seq_file)
 
 	MAPPING_BWA(channel_reads_prepro, params.num_threads, params.reference_genome, CREATE_BWA_INDEX.out.bwa_index.collect())
+
+	DEEPTOOLS_ANALYSIS(MAPPING_BWA.out.reads_mapped.collect(), MAPPING_BWA.out.reads_mapped_index.collect(), params.num_threads)
+
 
 	//MULTIQC_READS(params.tool_dir, params.num_threads, PREPROCESS_READS.out.reads_preprocessed, params.adapter_seq_file)
 	//MULTIQC_READS( (params.data_dir+"/reads_raw/"), params.tool_dir, params.num_threads, channel_reads, params.adapter_seq_file)
@@ -103,6 +107,17 @@ workflow {
 *	.take( params.dev ? params.number_of_inputs : -1 )
 *	.println() 
 */
+
+
+
+
+
+
+
+
+
+
+
 
 
 

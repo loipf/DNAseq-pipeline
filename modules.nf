@@ -46,7 +46,7 @@ process CREATE_BWA_INDEX {
 
 
 process PREPROCESS_READS { 
-	tag "cutadapt on $sample_id"
+	tag "$sample_id"
 	publishDir "$params.data_dir/reads_prepro", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
@@ -72,7 +72,7 @@ process PREPROCESS_READS {
 
 // not possible to run dynamically fastqc with same name
 process FASTQC_READS_RAW { 
-	tag "fastqc_raw on $sample_id"
+	tag "$sample_id"
 	publishDir "$params.data_dir/reads_raw", mode: "copy", overwrite: false, saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
@@ -93,11 +93,11 @@ process FASTQC_READS_RAW {
 
 
 process FASTQC_READS_PREPRO { 
-	tag "fastqc_prepro on $sample_id"
+	tag "$sample_id"
 	publishDir "$params.data_dir/reads_prepro", mode: "copy", overwrite: false, saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
-		tuple val(sample_id), path(reads) 
+		tuple val(sample_id), path(reads_prepro) 
 		val num_threads
 		path adapter_seq
 
@@ -107,7 +107,7 @@ process FASTQC_READS_PREPRO {
 
 	shell:
 	'''
-	fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads}
+	fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads_prepro}
 	'''
 }
 
@@ -115,27 +115,28 @@ process FASTQC_READS_PREPRO {
 
 
 process MAPPING_BWA { 
-	tag "bwa mapping on $sample_id"
+	tag "$sample_id"
 	publishDir "$params.data_dir/reads_mapped", mode: 'copy', saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
-		tuple val(sample_id), path(reads) 
+		tuple val(sample_id), path(reads_prepro) 
 		val num_threads
 		path reference_genome
 		path bwa_index  // to ensure index is created
 
 
 	output:
+		//tuple path("${sample_id}.bam"), path("${sample_id}.bam.bai"),  emit: reads_mapped
 		path "${sample_id}.bam", emit: reads_mapped
+		path "${sample_id}.bam.bai", emit: reads_mapped_index
 		path "${sample_id}_stats.txt"
 		path "*"
 		//path "${sample_id}_markup_stats.txt"  // problems saving
-		//path "${sample_id}.bam.ai"
 
 
 	shell:
 	'''
-	bwa mem -Y -t !{num_threads} -K 100000000 !{reference_genome} !{reads} \
+	bwa mem -Y -t !{num_threads} -K 100000000 !{reference_genome} !{reads_prepro} \
 	| samtools view -@ !{num_threads} -h -b - \
     | samtools sort -n -@ !{num_threads} - \
 	| samtools fixmate -m -@ !{num_threads} - - \
@@ -146,6 +147,36 @@ process MAPPING_BWA {
 	samtools stats -@ !{num_threads} !{sample_id}.bam > !{sample_id}_stats.txt
 
 	'''
+}
+
+
+
+
+process DEEPTOOLS_ANALYSIS { 
+	publishDir "$params.data_dir/reads_mapped/_deepTools", mode: 'copy'
+
+	input:
+		path reads_mapped
+		path reads_mapped_index
+		val num_threads
+
+	output:
+		path "*"
+
+
+	script:
+	"""
+	multiBamSummary bins -p $num_threads --smartLabels --bamfiles $reads_mapped -o multiBamSummary.npz
+
+	plotCorrelation --corData multiBamSummary.npz --corMethod spearman --whatToPlot heatmap --outFileCorMatrix plotCorrelation_matrix.tsv
+	plotPCA --corData multiBamSummary.npz --outFileNameData plotPCA_matrix.tsv
+	plotCoverage -p $num_threads --ignoreDuplicates --bamfiles $reads_mapped --outRawCounts plotCoverage_rawCounts_woDuplicates.tsv > plotCoverage_output.tsv
+
+	bamPEFragmentSize -p $num_threads --bamfiles $reads_mapped --table bamPEFragment_table.tsv --outRawFragmentLengths bamPEFragment_rawLength.tsv
+
+	estimateReadFiltering -p $num_threads --smartLabels --bamfiles $reads_mapped > estimateReadFiltering_output.tsv
+
+	"""
 }
 
 
