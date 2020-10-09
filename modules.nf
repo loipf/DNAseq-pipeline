@@ -56,14 +56,14 @@ process PREPROCESS_READS {
 
 	output:
 		tuple val(sample_id), path("${sample_id}_prepro_1.fastq.gz"), path("${sample_id}_prepro_2.fastq.gz"), emit: reads_prepro
-		path "cutadapt_output.txt"
+		path "${sample_id}_cutadapt_output.txt", emit: cutadapt
 
 	shell:
 	'''
 	ADAPTER_5=$(cat !{adapter_seq} | sed -n 1p | cut -f 2)  # forward
 	ADAPTER_3=$(cat !{adapter_seq} | sed -n 2p | cut -f 2)  # reverse
 
-	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > cutadapt_output.txt
+	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > !{sample_id}_cutadapt_output.txt
 
 	'''
 }
@@ -81,7 +81,7 @@ process FASTQC_READS_RAW {
 		path adapter_seq
 
 	output:
-		path "*.zip"
+		path "*.zip", emit: reports
 		path "*.html"
 
 	shell:
@@ -102,7 +102,7 @@ process FASTQC_READS_PREPRO {
 		path adapter_seq
 
 	output:
-		path "*.zip"
+		path "*.zip", emit: reports
 		path "*.html"
 
 	shell:
@@ -126,11 +126,10 @@ process MAPPING_BWA {
 
 
 	output:
-		//tuple path("${sample_id}.bam"), path("${sample_id}.bam.bai"),  emit: reads_mapped
 		path "${sample_id}.bam", emit: reads_mapped
 		path "${sample_id}.bam.bai", emit: reads_mapped_index
-		path "${sample_id}_stats.txt"
 		path "*"
+		//path "${sample_id}_stats.txt"
 		//path "${sample_id}_markup_stats.txt"  // problems saving
 
 
@@ -164,25 +163,72 @@ process DEEPTOOLS_ANALYSIS {
 		path "*"
 
 
-	script:
-	"""
-	multiBamSummary bins -p $num_threads --smartLabels --bamfiles $reads_mapped -o multiBamSummary.npz
+	shell:
+	'''
+	multiBamSummary bins -p !{num_threads} --smartLabels --bamfiles !{reads_mapped} -o multiBamSummary.npz
 
 	plotCorrelation --corData multiBamSummary.npz --corMethod spearman --whatToPlot heatmap --outFileCorMatrix plotCorrelation_matrix.tsv
 	plotPCA --corData multiBamSummary.npz --outFileNameData plotPCA_matrix.tsv
-	plotCoverage -p $num_threads --ignoreDuplicates --bamfiles $reads_mapped --outRawCounts plotCoverage_rawCounts_woDuplicates.tsv > plotCoverage_output.tsv
+	plotCoverage -p !{num_threads} --ignoreDuplicates --bamfiles !{reads_mapped} --outRawCounts plotCoverage_rawCounts_woDuplicates.tsv > plotCoverage_output.tsv
 
-	bamPEFragmentSize -p $num_threads --bamfiles $reads_mapped --table bamPEFragment_table.tsv --outRawFragmentLengths bamPEFragment_rawLength.tsv
+	bamPEFragmentSize -p !{num_threads} --bamfiles !{reads_mapped} --table bamPEFragment_table.tsv --outRawFragmentLengths bamPEFragment_rawLength.tsv
 
-	estimateReadFiltering -p $num_threads --smartLabels --bamfiles $reads_mapped > estimateReadFiltering_output.tsv
+	estimateReadFiltering -p !{num_threads} --smartLabels --bamfiles !{reads_mapped} > estimateReadFiltering_output.tsv
 
-	"""
+	'''
 }
 
 
 
 
 
+
+process MULTIQC_RAW { 
+	publishDir "$params.data_dir/quality_reports", mode: "copy"
+
+	input:
+		path stat_files
+
+	output:
+		path "*"
+
+	shell:
+	'''
+	multiqc -f -o reads_raw .
+	'''
+}
+
+
+process MULTIQC_PREPRO { 
+	publishDir "$params.data_dir/quality_reports", mode: "copy"
+
+	input:
+		path stat_files
+
+	output:
+		path "*"
+
+	shell:
+	'''
+	multiqc -f -o reads_prepro .
+	'''
+}
+
+
+process MULTIQC_MAPPED { 
+	publishDir "$params.data_dir/quality_reports", mode: "copy"
+
+	input:
+		path stat_files
+
+	output:
+		path "*"
+
+	shell:
+	'''
+	multiqc -f -o reads_mapped .
+	'''
+}
 
 
 

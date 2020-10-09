@@ -19,6 +19,9 @@ include {
 	FASTQC_READS_PREPRO;
 	MAPPING_BWA;
 	DEEPTOOLS_ANALYSIS;
+	MULTIQC_RAW;
+	MULTIQC_PREPRO;
+	MULTIQC_MAPPED;
 	TEST;
 	TEST2
 } from './modules.nf' 
@@ -53,6 +56,7 @@ DNA-SEQ PIPELINE
 ================================
 reads		: $params.reads
 data_dir	: $params.data_dir
+================================
 
 """
 
@@ -87,8 +91,12 @@ workflow {
 	DEEPTOOLS_ANALYSIS(MAPPING_BWA.out.reads_mapped.collect(), MAPPING_BWA.out.reads_mapped_index.collect(), params.num_threads)
 
 
-	//MULTIQC_READS(params.tool_dir, params.num_threads, PREPROCESS_READS.out.reads_preprocessed, params.adapter_seq_file)
-	//MULTIQC_READS( (params.data_dir+"/reads_raw/"), params.tool_dir, params.num_threads, channel_reads, params.adapter_seq_file)
+	MULTIQC_RAW(FASTQC_READS_RAW.out.reports.collect() )
+	MULTIQC_PREPRO(FASTQC_READS_PREPRO.out.reports.concat(PREPROCESS_READS.out.cutadapt).collect() )
+	//MULTIQC_MAPPED(MAPPING_BWA.out.reads_mapped.concat(MAPPING_BWA.out[3], DEEPTOOLS_ANALYSIS.out[0]).collect() )
+
+
+
 
 
 	//TEST(channel_reads)
@@ -97,18 +105,10 @@ workflow {
 }
 
 
- 
-
-/*
-* params.dev = false
-* params.number_of_inputs = 2
-* Channel
-*	.from(1..300)
-*	.take( params.dev ? params.number_of_inputs : -1 )
-*	.println() 
-*/
 
 
+//workflow.onComplete { 
+//	println ( workflow.success ? "\ndone! check the quality reports in --> $params.data_dir/quality_reports\n" : "oops .. something went wrong" ) } 
 
 
 
