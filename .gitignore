@@ -13,6 +13,9 @@ results
 *.html
 
 .git
+.Rhistory
+
+
 
 
 

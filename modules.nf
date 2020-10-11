@@ -26,22 +26,6 @@ process DATA_ACQUISITION {
 	'''
 }
 
-
-
-process CREATE_BWA_INDEX { 
-	publishDir "$params.data_dir/bwa_index", mode: "copy"
-
-	input:
-		path reference_genome
-
-	output:
-		path "*.{amb,ann,bwt,pac,sa}", emit: bwa_index
-
-	shell:
-	'''
-	bwa index !{reference_genome} 
-	'''
-}
 	
 
 
@@ -113,6 +97,22 @@ process FASTQC_READS_PREPRO {
 
 
 
+process CREATE_BWA_INDEX { 
+	publishDir "$params.data_dir/bwa_index", mode: "copy"
+
+	input:
+		path reference_genome
+
+	output:
+		path "*.{amb,ann,bwt,pac,sa}", emit: bwa_index
+
+	shell:
+	'''
+	bwa index !{reference_genome} 
+	'''
+}
+
+
 
 process MAPPING_BWA { 
 	tag "$sample_id"
@@ -129,8 +129,6 @@ process MAPPING_BWA {
 		path "${sample_id}.bam", emit: reads_mapped
 		path "${sample_id}.bam.bai", emit: reads_mapped_index
 		path "*", emit: all
-		//path "${sample_id}_stats.txt"
-		//path "${sample_id}_markup_stats.txt"  // problems saving
 
 
 	shell:

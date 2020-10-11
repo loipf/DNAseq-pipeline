@@ -33,7 +33,7 @@ include {
  * default parameters
  */ 
 
-params.dev = true
+params.dev = false
 
 params.reads		= "$projectDir/test_reads_dir/*/*_{1,2}.fastq.gz"
 params.data_dir		= "$projectDir/data"
@@ -53,10 +53,13 @@ params.reference_genome	= "$projectDir/data/Homo_sapiens.GRCh38.dna.alt.fa.gz"
 
 log.info """\
 DNA-SEQ PIPELINE
-================================
-reads		: $params.reads
-data_dir	: $params.data_dir
-================================
+===================================================
+reads			: $params.reads
+data_dir		: $params.data_dir
+reference_genome	: $params.reference_genome
+adapter_seq_file	: $params.adapter_seq_file
+
+===================================================
 
 """
 
@@ -71,12 +74,6 @@ workflow {
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
 			.take( params.dev ? 2 : -1 )  // only consider 2 files for debugging
 
-	//channel_reads = Channel
-	//		.from( [["id1","read1","read2"], ["id2","read1","read2"]])
-	//		.map{ it -> tuple(it[0], tuple(it[1], it[2])) }
-	//
-	//	.view()
-
 
 	// // DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
 	CREATE_BWA_INDEX(params.reference_genome)
@@ -90,28 +87,10 @@ workflow {
 
 	DEEPTOOLS_ANALYSIS(MAPPING_BWA.out.reads_mapped.collect(), MAPPING_BWA.out.reads_mapped_index.collect(), params.num_threads)
 
-
 	MULTIQC_RAW(FASTQC_READS_RAW.out.reports.collect() )
 	MULTIQC_PREPRO(FASTQC_READS_PREPRO.out.reports.concat(PREPROCESS_READS.out.cutadapt).collect() )
 	MULTIQC_MAPPED(MAPPING_BWA.out.all.concat(DEEPTOOLS_ANALYSIS.out.all).collect())
 	
-	//MULTIQC_PREPRO(FASTQC_READS_PREPRO.out.reports.collect() )
-	//MULTIQC_PREPRO(PREPROCESS_READS.out.cutadapt.collect() )
-
-	//channel_multiqc = PREPROCESS_READS.out.cutadapt.collect().view()
-	//channel_multiqc = FASTQC_READS_PREPRO.out.reports.collect().view()
-
-
-	// channel_multiqc = MAPPING_BWA.out.reads_mapped.concat(MAPPING_BWA.out[3], DEEPTOOLS_ANALYSIS.out[1]).collect().view()
-	// channel_multiqc = MAPPING_BWA.out.all.concat(DEEPTOOLS_ANALYSIS.out.all).collect().view()
-		
-
-
-
-
-
-	//TEST(channel_reads)
-	//TEST2(channel_reads_prepro)
 
 }
 
