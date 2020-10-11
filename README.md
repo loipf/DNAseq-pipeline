@@ -4,7 +4,8 @@ a DNA-seq mapping pipeline from `.fastq` files to `.bam` files with intermediate
 
 
 ---
-# set up pipeline
+### set up pipeline
+
 
 before running, you have to set up the attached Docker image:
 ```sh
@@ -27,7 +28,7 @@ ADAPTER_3	GATCGG
 
 
 ---
-# run mapping pipeline
+### run mapping pipeline
 
 ```sh
 nextflow run main.nf
