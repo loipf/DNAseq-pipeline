@@ -93,7 +93,18 @@ workflow {
 
 	MULTIQC_RAW(FASTQC_READS_RAW.out.reports.collect() )
 	MULTIQC_PREPRO(FASTQC_READS_PREPRO.out.reports.concat(PREPROCESS_READS.out.cutadapt).collect() )
-	//MULTIQC_MAPPED(MAPPING_BWA.out.reads_mapped.concat(MAPPING_BWA.out[3], DEEPTOOLS_ANALYSIS.out[0]).collect() )
+	MULTIQC_MAPPED(MAPPING_BWA.out.all.concat(DEEPTOOLS_ANALYSIS.out.all).collect())
+	
+	//MULTIQC_PREPRO(FASTQC_READS_PREPRO.out.reports.collect() )
+	//MULTIQC_PREPRO(PREPROCESS_READS.out.cutadapt.collect() )
+
+	//channel_multiqc = PREPROCESS_READS.out.cutadapt.collect().view()
+	//channel_multiqc = FASTQC_READS_PREPRO.out.reports.collect().view()
+
+
+	// channel_multiqc = MAPPING_BWA.out.reads_mapped.concat(MAPPING_BWA.out[3], DEEPTOOLS_ANALYSIS.out[1]).collect().view()
+	// channel_multiqc = MAPPING_BWA.out.all.concat(DEEPTOOLS_ANALYSIS.out.all).collect().view()
+		
 
 
 

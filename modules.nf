@@ -63,7 +63,7 @@ process PREPROCESS_READS {
 	ADAPTER_5=$(cat !{adapter_seq} | sed -n 1p | cut -f 2)  # forward
 	ADAPTER_3=$(cat !{adapter_seq} | sed -n 2p | cut -f 2)  # reverse
 
-	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > !{sample_id}_cutadapt_output.txt
+	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any --minimum-length 10 -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > !{sample_id}_cutadapt_output.txt
 
 	'''
 }
@@ -128,7 +128,7 @@ process MAPPING_BWA {
 	output:
 		path "${sample_id}.bam", emit: reads_mapped
 		path "${sample_id}.bam.bai", emit: reads_mapped_index
-		path "*"
+		path "*", emit: all
 		//path "${sample_id}_stats.txt"
 		//path "${sample_id}_markup_stats.txt"  // problems saving
 
@@ -160,7 +160,7 @@ process DEEPTOOLS_ANALYSIS {
 		val num_threads
 
 	output:
-		path "*"
+		path "*", emit:all
 
 
 	shell:
