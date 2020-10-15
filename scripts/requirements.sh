@@ -13,6 +13,7 @@ PICARD_VERSION="2.23.4"
 FASTQC_VERSION="v0.11.9"
 MULTIQC_VERSION="1.9"
 DEEPTOOLS_VERSION="3.5.0"
+VEP_VERSION="release/101.0"
 
 
 mkdir $TOOL_DIR
@@ -63,6 +64,31 @@ pip install multiqc==$MULTIQC_VERSION
 #python setup.py install --prefix /User/Tools/deepTools2.0
 
 pip install deeptools==$DEEPTOOLS_VERSION
+
+
+### VEP
+git clone https://github.com/Ensembl/ensembl-vep.git --branch $VEP_VERSION
+cd ensembl-vep
+
+# requirements
+cpan App::cpanminus
+sudo apt install cpanminus
+sudo cpanm Archive::Zip
+#sudo apt-get install libmysqlclient-dev # required on ubuntu for mysql
+sudo cpanm DBD::mysql  # without this only --offline
+sudo cpanm DBI
+sudo cpanm JSON
+sudo cpanm PerlIO::gzip
+
+perl INSTALL.pl
+436 438 440
+
+cd $TOOL_DIR
+
+
+
+
+
 
 
 
