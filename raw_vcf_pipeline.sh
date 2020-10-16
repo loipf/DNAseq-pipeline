@@ -12,7 +12,7 @@ data_dir="/home/stefan/Documents/umcg/bash_dna-seq_pipeline/data"
 #tool_bwa="/home/stefan/tools/bwa/bwa"
 #tool_deeptools="/home/stefan/miniconda3/bin/deeptools"
 
-tool_bcftools="/home/stefan/tools/bcftools-1.11/bcftools"
+tool_bcftools="/home/stefan/tools/bcftools-1.11/bcftools" # needs tabix and bgzip
 tool_vep="/home/stefan/tools/ensembl-vep/vep"
 
 num_threads="3"
@@ -20,7 +20,7 @@ num_threads="3"
 
 
 deepvariant_version="1.0.0"
-glnexus_version="v1.2.7"
+glnexus_version="v1.2.7"  
 
 ############################################
 
@@ -79,9 +79,9 @@ do
 #		--output_gvcf=/output/$sample_id.g.vcf.gz \
 #		--num_shards=$num_threads
 
-	$tool_vep -i $sample_out_dir/$sample_id.vcf.gz -o $sample_id\_vep.txt --database    # --offline
+#	$tool_bcftools stats --threads $num_threads $sample_out_dir/$sample_id.vcf.gz > $sample_id\_vcfstats.txt
+#	$tool_vep -i $sample_out_dir/$sample_id.vcf.gz -o $sample_id\_vep.txt --database    # --offline
 
-	#$tool_bcftools stats --threads $num_threads $sample_out_dir/$sample_id.vcf.gz > $sample_id\_vcfstats.txt
 
 done
 
@@ -92,13 +92,17 @@ done
 # GLnexus https://github.com/dnanexus-rnd/GLnexus/wiki/Getting-Started
 
 
-### TODO ADD HEADER TO VCF OR SAM !! bcftools reheader
+############################################
+### create common .vcf and VEP
+
+mkdir -p $data_dir/variants_vcf/_all
 
 #docker run --rm -i \
 #	-v $data_dir/variants_vcf:"/in" \
 #	quay.io/mlin/glnexus:$glnexus_version \
-#    bash -c "glnexus_cli --threads ${num_threads} --config DeepVariant /in/*/*.g.vcf.gz" # > dv_1000G_ALDH2.bcf
-#--mem-gbytes 5
+#    bash -c "glnexus_cli --threads ${num_threads} --config DeepVariant /in/*/*.g.vcf.gz" > $data_dir/variants_vcf/_all/glnexus_vcf_all.bcf
+###--mem-gbytes 5
+#$tool_bcftools view $data_dir/variants_vcf/_all/glnexus_vcf_all.bcf | bgzip -@ $num_threads -c > $data_dir/variants_vcf/_all/glnexus_vcf_all.vcf.gz
 
 
 
