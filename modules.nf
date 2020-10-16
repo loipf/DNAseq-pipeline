@@ -133,7 +133,7 @@ process MAPPING_BWA {
 
 	shell:
 	'''
-	bwa mem -Y -t !{num_threads} -K 100000000 !{reference_genome} !{reads_prepro} \
+	bwa mem -Y -R "@RG\\tID:!{sample_id}\\tSM:!{sample_id}" -t !{num_threads} -K 100000000 !{reference_genome} !{reads_prepro} \
 	| samtools view -@ !{num_threads} -h -b - \
     | samtools sort -n -@ !{num_threads} - \
 	| samtools fixmate -m -@ !{num_threads} - - \
