@@ -39,7 +39,7 @@ nextflow run main.nf
 or
 
 ```sh
-nextflow run loipf/DNAseq-pipeline
+nextflow run loipf/DNAseq-pipeline --project_dir /path/to/folder --num_threads 10
 ```
 
 

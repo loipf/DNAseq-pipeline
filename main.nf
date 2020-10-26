@@ -35,7 +35,7 @@ params.dev = false
 
 params.project_dir	= "$projectDir"
 
-params.reads		= "$params.project_dir/data/reads_raw/*/*_{1,2}.fastq.gz"
+params.reads		= "$params.project_dir/data/reads_raw/*/*_{1,2}.{fastq,fq}.gz"
 params.data_dir		= "$params.project_dir/data"
 params.scripts_dir	= "$params.project_dir/scripts"
 
