@@ -1,7 +1,7 @@
 
 
 // need params.data_dir declared in main.nf, not implemented in DSL2 yet
-params.data_dir	= "$projectDir/data"
+params.data_dir	= "$launchDir/data"
 
 
 

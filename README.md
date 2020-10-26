@@ -9,10 +9,10 @@ a DNAseq mapping pipeline from `.fastq` files to `.bam` files with intermediate 
 
 before running, you have to set up the attached Docker image:
 ```sh
-sudo docker build -t dna-seq_pipeline https://raw.githubusercontent.com/loipf/DNAseq-pipeline/master/docker/Dockerfile
+docker build -t dnaseq-pipeline https://raw.githubusercontent.com/loipf/DNAseq-pipeline/master/docker/Dockerfile
 ```
 
-now either replace the Docker container hash (last output line from previous build command) in `nextflow.config` or run nextflow with the `-with-docker [container hash]` argument.
+now either replace the Docker container hash (last output line from previous build command) in `nextflow.config` or run nextflow with the `-with-docker dnaseq-pipeline` argument.
 
 
 
@@ -31,7 +31,7 @@ ADAPTER_3	GATCGG
 ---
 ### run mapping pipeline
 
-it can be run locally with downloaded github-repo with:
+it can be run locally with downloaded github-repo and edited `nextflow.config` file with:
 ```sh
 nextflow run main.nf
 ```
@@ -39,8 +39,10 @@ nextflow run main.nf
 or
 
 ```sh
-nextflow run loipf/DNAseq-pipeline --project_dir /path/to/folder --num_threads 10
+nextflow run loipf/DNAseq-pipeline --project_dir /path/to/folder --num_threads 10 -with-docker dnaseq-pipeline
 ```
+for this execution to work properly, you have to be in the current project directory.
+
 
 
 by default, all output will be saved into the `data` folder
