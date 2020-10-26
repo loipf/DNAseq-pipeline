@@ -46,7 +46,7 @@ params.scripts_dir	= "$projectDir/scripts"
 
 params.num_threads		= 3
 params.adapter_seq_file	= "$projectDir/data/adapter_seq.tsv"
-params.reference_genome	= "$projectDir/data/Homo_sapiens.GRCh38.dna.alt.fa.gz"
+params.reference_genome	= "$projectDir/data/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
 
 
 
