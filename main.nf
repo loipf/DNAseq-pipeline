@@ -22,8 +22,6 @@ include {
 	MULTIQC_RAW;
 	MULTIQC_PREPRO;
 	MULTIQC_MAPPED;
-	TEST;
-	TEST2
 } from './modules.nf' 
 
 
@@ -35,9 +33,11 @@ include {
 
 params.dev = false
 
-params.reads		= "$projectDir/test_reads_dir/*/*_{1,2}.fastq.gz"
-params.data_dir		= "$projectDir/data"
-params.scripts_dir	= "$projectDir/scripts"
+params.project_dir	= $projectDir
+
+params.reads		= "$params.project_dir/data/reads_raw/*/*_{1,2}.fastq.gz"
+params.data_dir		= "$params.project_dir/data"
+params.scripts_dir	= "$params.project_dir/scripts"
 
 
 /*
@@ -45,8 +45,8 @@ params.scripts_dir	= "$projectDir/scripts"
  */
 
 params.num_threads		= 3
-params.adapter_seq_file	= "$projectDir/data/adapter_seq.tsv"
-params.reference_genome	= "$projectDir/data/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
+params.adapter_seq_file	= "$params.project_dir/data/adapter_seq.tsv"
+params.reference_genome	= "$params.project_dir/data/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz"
 
 
 

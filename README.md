@@ -1,6 +1,6 @@
-# DNA-seq pipeline
+# DNAseq pipeline
 
-a DNA-seq mapping pipeline from `.fastq` files to `.bam` files with intermediate quality reports
+a DNAseq mapping pipeline from `.fastq` files to `.bam` files with intermediate quality reports
 
 
 ---
@@ -9,7 +9,7 @@ a DNA-seq mapping pipeline from `.fastq` files to `.bam` files with intermediate
 
 before running, you have to set up the attached Docker image:
 ```sh
-sudo docker build -t dna-seq_pipeline https://raw.githubusercontent.com/loipf/DNA-seq_pipeline/master/docker/Dockerfile
+sudo docker build -t dna-seq_pipeline https://raw.githubusercontent.com/loipf/DNAseq-pipeline/master/docker/Dockerfile
 ```
 
 now either replace the Docker container hash (last output line from previous build command) in `nextflow.config` or run nextflow with the `-with-docker [container hash]` argument.
@@ -39,7 +39,7 @@ nextflow run main.nf
 or
 
 ```sh
-nextflow run loipf/dna_
+nextflow run loipf/DNAseq-pipeline
 ```
 
 

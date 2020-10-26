@@ -238,47 +238,6 @@ process MULTIQC_MAPPED {
 
 
 
-//.map{ file -> tuple(file[0], file)}
-
-process TEST { 
-	publishDir "$params.data_dir/test", mode: 'copy'
- 
-	input:
-		tuple val(sample_id), path(reads) 
-
-	output:
-		tuple val(sample_id), path("test_1.fastq.txt"), path("test_2.fastq.txt"), emit: reads_prepro
-
-
-	shell:
-	"""
-	echo !{sample_id} > test_1.fastq.txt
-	echo !{sample_id} > test_2.fastq.txt
-	"""
-}
-
-
-process TEST2 { 
-	publishDir "$params.data_dir/test2", mode: 'copy'
- 
-	input:
-		tuple val(sample_id), path(reads) 
-
-	output:
-		path "${sample_id}" 
-		//path("test2_1.fastq.txt")
-		//path("test2_2.fastq.txt")
-
-	shell:
-	"""
-	echo !{sample_id} > test2_1.fastq.txt
-	echo !{reads} > test2_2.fastq.txt
-	"""
-}
-
-
-
-
 
 
 
