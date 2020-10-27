@@ -13,6 +13,7 @@ nextflow.enable.dsl=2
 
 include { 
 	DATA_ACQUISITION;
+	COPY_READS;
 	CREATE_BWA_INDEX;
 	PREPROCESS_READS;
 	FASTQC_READS_RAW;
@@ -34,7 +35,8 @@ include {
 params.dev = false
 
 params.project_dir	= "$projectDir"
-params.reads_dir	= "$params.project_dir/data/reads_raw"
+//params.reads_dir	= "$params.project_dir/data/reads_raw"   TODO CHANGE
+params.reads_dir	= "$params.project_dir/test_reads_dir"
 
 params.reads		= "$params.reads_dir/*/*_{1,2}.{fastq,fq}.gz"
 params.data_dir		= "$params.project_dir/data"
@@ -73,7 +75,9 @@ workflow {
 	channel_reads = Channel
 			.fromFilePairs( params.reads )
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
-			.take( params.dev ? 5 : -1 )  // only consider 2 files for debugging
+			.take( params.dev ? 5 : -1 )  // only consider a few files for debugging
+
+	//COPY_READS(channel_reads)
 
 
 	// // DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
