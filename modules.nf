@@ -26,28 +26,6 @@ process DATA_ACQUISITION {
 	'''
 }
 
-	
-
-// fix to avoid permission error with pigz
-process COPY_READS {
-	input:
-	tuple val(sample_id), path(channel_reads)
-
-	output:
-	file('*') into copy_channel_reads
-	tuple val(sample_id), path(channel_reads_copy), emit: copy_channel_reads
-
-	script:
-	"""
-	cat channel_reads > channel_reads
-	!{channel_reads}
-
-	"""
-}
-
-
-
-
 
 
 process PREPROCESS_READS { 

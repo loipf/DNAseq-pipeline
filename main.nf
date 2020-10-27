@@ -13,7 +13,6 @@ nextflow.enable.dsl=2
 
 include { 
 	DATA_ACQUISITION;
-	COPY_READS;
 	CREATE_BWA_INDEX;
 	PREPROCESS_READS;
 	FASTQC_READS_RAW;
@@ -76,8 +75,6 @@ workflow {
 			.fromFilePairs( params.reads )
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
 			.take( params.dev ? 5 : -1 )  // only consider a few files for debugging
-
-	//COPY_READS(channel_reads)
 
 
 	// // DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
