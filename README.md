@@ -44,6 +44,11 @@ nextflow run loipf/DNAseq-pipeline --project_dir /path/to/folder --reads_dir /pa
 for this execution to work properly, you have to be in the current project directory.
 
 
+optional extendable with:
+```sh
+-resume -with-report report_DNAseq-pipeline -with-timeline timeline_DNAseq-pipeline
+```
+
 
 by default, all output will be saved into the `data` folder
 

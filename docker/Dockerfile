@@ -5,6 +5,8 @@ MAINTAINER loipf
 #RUN apt-get update 
 #RUN conda update --all
 
+RUN apt-get update && apt install -y procps
+
 RUN conda config --add channels defaults
 RUN conda config --add channels bioconda
 RUN conda config --add channels conda-forge
