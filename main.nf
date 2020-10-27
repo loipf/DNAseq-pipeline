@@ -34,8 +34,9 @@ include {
 params.dev = false
 
 params.project_dir	= "$projectDir"
+params.reads_dir	= "$params.project_dir/data/reads_raw"
 
-params.reads		= "$params.project_dir/data/reads_raw/*/*_{1,2}.{fastq,fq}.gz"
+params.reads		= "$params.reads_dir/*/*_{1,2}.{fastq,fq}.gz"
 params.data_dir		= "$params.project_dir/data"
 params.scripts_dir	= "$params.project_dir/scripts"
 
@@ -72,7 +73,7 @@ workflow {
 	channel_reads = Channel
 			.fromFilePairs( params.reads )
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
-			.take( params.dev ? 2 : -1 )  // only consider 2 files for debugging
+			.take( params.dev ? 5 : -1 )  // only consider 2 files for debugging
 
 
 	// // DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK

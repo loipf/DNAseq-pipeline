@@ -31,7 +31,7 @@ process DATA_ACQUISITION {
 
 process PREPROCESS_READS { 
 	tag "$sample_id"
-	publishDir "$params.data_dir/reads_prepro", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
+	publishDir "$params.data_dir/reads_prepro", pattern:"*cutadapt_output.txt", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:
 		tuple val(sample_id), path(reads) 
@@ -135,7 +135,7 @@ process MAPPING_BWA {
 	'''
 	bwa mem -Y -R "@RG\\tID:!{sample_id}\\tSM:!{sample_id}" -t !{num_threads} -K 100000000 !{reference_genome} !{reads_prepro} \
 	| samtools view -@ !{num_threads} -h -b - \
-    | samtools sort -n -@ !{num_threads} - \
+	| samtools sort -n -@ !{num_threads} - \
 	| samtools fixmate -m -@ !{num_threads} - - \
 	| samtools sort -@ !{num_threads} - \
 	| samtools markdup -@ !{num_threads} -f !{sample_id}_markdup_stats.txt - !{sample_id}.bam
