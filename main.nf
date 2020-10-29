@@ -31,7 +31,7 @@ include {
  * default parameters
  */ 
 
-params.dev = false
+params.dev_samples = -1
 
 params.project_dir	= "$projectDir"
 //params.reads_dir	= "$params.project_dir/data/reads_raw"   TODO CHANGE
@@ -74,7 +74,7 @@ workflow {
 	channel_reads = Channel
 			.fromFilePairs( params.reads )
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
-			.take( params.dev ? 50 : -1 )  // only consider a few files for debugging
+			.take( params.dev_samples )  // only consider a few files for debugging
 
 
 	// // DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
