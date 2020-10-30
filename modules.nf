@@ -2,7 +2,6 @@
 
 // need params.data_dir declared in main.nf, not implemented in DSL2 yet
 params.data_dir	= "$launchDir/data"
-params.use_cache = false
 
 
 
@@ -31,7 +30,6 @@ process DATA_ACQUISITION {
 
 process PREPROCESS_READS { 
 	tag "$sample_id"
-	cache params.use_cache
 	publishDir "$params.data_dir/reads_prepro", pattern:"*cutadapt_output.txt", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 	stageInMode = 'copy'   // avoids permission denied error
 
@@ -119,7 +117,6 @@ process CREATE_BWA_INDEX {
 
 process MAPPING_BWA { 
 	tag "$sample_id"
-	cache params.use_cache
 	publishDir "$params.data_dir/reads_mapped", mode: 'copy', saveAs: { filename -> "${sample_id}/$filename" }
 
 	input:

@@ -46,11 +46,14 @@ for this execution to work properly, you have to be in the current project direc
 
 optional extendable with:
 ```sh
--resume -with-report report_DNAseq-pipeline -with-timeline timeline_DNAseq-pipeline
+-resume
+-with-report report_DNAseq-pipeline
+-with-timeline timeline_DNAseq-pipeline
+-w work_dir
 ```
 
 
-by default, all output will be saved into the `data` folder
+by default, all output will be saved into the `data` folder of the current directory
 
 
 
