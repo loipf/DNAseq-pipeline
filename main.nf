@@ -34,8 +34,7 @@ include {
 params.dev_samples = -1
 
 params.project_dir	= "$projectDir"
-//params.reads_dir	= "$params.project_dir/data/reads_raw"   TODO CHANGE
-params.reads_dir	= "$params.project_dir/test_reads_dir"
+params.reads_dir	= "$params.project_dir/data/reads_raw"
 
 params.reads		= "$params.reads_dir/*/*_{1,2}.{fastq,fq}.gz"
 params.data_dir		= "$params.project_dir/data"
