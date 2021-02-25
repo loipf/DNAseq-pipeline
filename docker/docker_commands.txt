@@ -1,0 +1,33 @@
+### random docker commands:
+
+# sudo docker build .
+# docker build -t skptic/lncRNA_annotation .
+# sudo docker run --name test ad0077dfbe3e
+# sudo docker stop test
+# sudo docker rm test
+# sudo docker ps
+
+#sudo docker images -a
+#sudo docker rmi d80d9d9b3dc3
+
+
+
+### perform to start docker image (maybe with github url?):
+
+sudo docker build .
+### get image id: 685e6d2a2629
+sudo chmod 666 /var/run/docker.sock   # give permission to all users 
+### or check fix here: https://www.digitalocean.com/community/questions/how-to-fix-docker-got-permission-denied-while-trying-to-connect-to-the-docker-daemon-socket
+
+### run interactively
+docker container run -it rnaseq-pipeline /usr/bin/env R
+
+### remove cache
+docker system prune -a
+
+# docker build --no-cache -t skptic/lncRNA_annotation .
+
+
+docker save myimage:latest | gzip > myimage_latest.tar.gz
+docker import url
+

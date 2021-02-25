@@ -19,9 +19,9 @@ process DATA_ACQUISITION {
 
 	shell:
 	'''
-	curl ftp://ftp.ensembl.org/pub/release-!{ensembl_release}/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.MT.fa.gz > Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+#	curl ftp://ftp.ensembl.org/pub/release-!{ensembl_release}/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome.MT.fa.gz > Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
-#	  curl ftp://ftp.ensembl.org/pub/release-!{ensembl_release}/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz > Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
+	curl ftp://ftp.ensembl.org/pub/release-!{ensembl_release}/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz > Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
 	'''
 }
@@ -32,6 +32,7 @@ process PREPROCESS_READS {
 	tag "$sample_id"
 	publishDir "$params.data_dir/reads_prepro", pattern:"*cutadapt_output.txt", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 	stageInMode = 'copy'   // avoids permission denied error
+	cache false
 
 	input:
 		tuple val(sample_id), path(reads) 
@@ -59,6 +60,7 @@ process FASTQC_READS_RAW {
 	tag "$sample_id"
 	publishDir "$params.data_dir/reads_raw", mode: "copy", overwrite: false, saveAs: { filename -> "${sample_id}/$filename" }
 	stageInMode = 'copy'   // avoids permission denied error
+	cache false
 
 	input:
 		tuple val(sample_id), path(reads) 
@@ -118,6 +120,7 @@ process CREATE_BWA_INDEX {
 process MAPPING_BWA { 
 	tag "$sample_id"
 	publishDir "$params.data_dir/reads_mapped", mode: 'copy', saveAs: { filename -> "${sample_id}/$filename" }
+	cache false
 
 	input:
 		tuple val(sample_id), path(reads_prepro) 
