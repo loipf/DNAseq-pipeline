@@ -34,7 +34,7 @@ include {
 params.dev_samples = -1
 
 params.project_dir	= "$projectDir"
-params.reads_dir	= "$params.project_dir/data/reads_raw" 
+params.reads_dir	= "$params.project_dir/data/reads_raw"
 
 params.reads		= "$params.reads_dir/*/*_{1,2}.{fastq,fq}.gz"
 params.data_dir		= "$params.project_dir/data"
@@ -98,8 +98,8 @@ workflow {
 
 
 
-//workflow.onComplete { 
-//	println ( workflow.success ? "\ndone! check the quality reports in --> $params.data_dir/quality_reports\n" : "oops .. something went wrong" ) } 
+workflow.onComplete { 
+	println ( workflow.success ? "\ndone! check the quality reports in --> $params.data_dir/quality_reports\n" : "oops .. something went wrong" ) } 
 
 
 
