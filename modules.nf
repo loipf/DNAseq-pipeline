@@ -30,25 +30,52 @@ process DATA_ACQUISITION {
 
 process PREPROCESS_READS { 
 	tag "$sample_id"
-	publishDir "$params.data_dir/reads_prepro", pattern:"*cutadapt_output.txt", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
+	publishDir "$params.data_dir/reads_prepro"//, pattern:"*cutadapt_output.txt", mode: "copy", saveAs: { filename -> "${sample_id}/$filename" }
 	stageInMode = 'copy'   // avoids permission denied error
 	cache false
 
 	input:
 		tuple val(sample_id), path(reads) 
 		val num_threads
-		path adapter_seq
+		path adapter_3_seq_file
+		path adapter_5_seq_file
 
 	output:
-		tuple val(sample_id), path("${sample_id}_prepro_1.fastq.gz"), path("${sample_id}_prepro_2.fastq.gz"), emit: reads_prepro
-		path "${sample_id}_cutadapt_output.txt", emit: cutadapt
+		//tuple val(sample_id), path("${sample_id}_prepro_1.fastq.gz"), path("${sample_id}_prepro_2.fastq.gz"), emit: reads_prepro
+		//path "${sample_id}_cutadapt_output.txt", emit: cutadapt
 
 	shell:
 	'''
-	ADAPTER_5=$(cat !{adapter_seq} | sed -n 1p | cut -f 2)  # forward
-	ADAPTER_3=$(cat !{adapter_seq} | sed -n 2p | cut -f 2)  # reverse
 
-	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any --minimum-length 10 -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > !{sample_id}_cutadapt_output.txt
+	#cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any --minimum-length 10 -b $ADAPTER_5 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > !{sample_id}_cutadapt_output.txt
+
+
+	### adapter as string or file
+	if [[ !{adapter_3_seq_file} == *".fasta"* ]]
+	then
+  		ADAPTER_3=file:!{adapter_3_seq_file}
+	else
+		ADAPTER_3=!{adapter_3_seq_file}
+	fi
+
+	### adapter as string or file
+	if [[ !{adapter_5_seq_file} == *".fasta"* ]]
+	then
+  		ADAPTER_5=file:!{adapter_5_seq_file}
+	else
+		ADAPTER_5=!{adapter_5_seq_file}
+	fi
+	
+	echo $ADAPTER_3
+	echo !{sample_id}
+	echo !{reads}
+
+	### combine multiple seq files together
+	cat *_1.fastq.gz > raw_reads_connected_1.fastq.gz
+
+	echo $!{reads}
+
+	#cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any --minimum-length 10 -a $ADAPTER_3 -B $ADAPTER_3 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{reads} > !{sample_id}_cutadapt_output.txt
 
 	'''
 }
