@@ -10,10 +10,10 @@ ensembl_release="101"
 cd $data_dir
 
 
-### get reference genome - WGS
+### get reference genome - WGS + WES
 curl ftp://ftp.ensembl.org/pub/release-$ensembl_release/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz > Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
-### get reference genome - WES
+### get reference genome - RNASEQ
 curl ftp://ftp.ensembl.org/pub/release-$ensembl_release/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz > Homo_sapiens.GRCh38.cdna.all.fa.gz
 
 
