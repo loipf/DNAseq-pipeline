@@ -14,7 +14,7 @@ cd $data_dir
 curl ftp://ftp.ensembl.org/pub/release-$ensembl_release/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz > Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz
 
 ### get reference genome - WES
-curl ftp://ftp.ensembl.org/pub/release-$ensembl_release/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz > HHomo_sapiens.GRCh38.cdna.all.fa.gz
+curl ftp://ftp.ensembl.org/pub/release-$ensembl_release/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz > Homo_sapiens.GRCh38.cdna.all.fa.gz
 
 
 

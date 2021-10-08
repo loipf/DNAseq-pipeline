@@ -21,10 +21,12 @@ if you already have an reference genome, you can specify it with the nextflow ar
 bash scripts/data_acquisition.sh
 ```
 
-additional, an adapter sequence file needs to be specified with the nextflow argument `--adapter_seq_file [file.tsv]` or in the `main.nf` file. it must be structured as follows:
+additional, an 3' and 5' adapter sequence (file) needs to be specified with the nextflow arguments `--adapter_3_seq_file [sequence|file.fasta]` and `--adapter_5_seq_file [sequence|file.fasta]` or in the `main.nf` file. if a file is provided, it must be structured like the following example:
 ```
-ADAPTER_5	AANTGG
-ADAPTER_3	GATCGG
+> adapter_3_batch_01
+AANTGG
+> adapter_3_batch_02
+GATCGG
 ```
 
 
@@ -39,7 +41,7 @@ nextflow run main.nf
 or
 
 ```sh
-nextflow run loipf/DNAseq-pipeline --project_dir /path/to/folder --reads_dir /path/to/samples --num_threads 10 -with-docker dnaseq-pipeline
+nextflow run loipf/DNAseq-pipeline -r main --project_dir /path/to/folder --reads_dir /path/to/samples --num_threads 10 --adapter_3_seq_file adapter_3.fasta --adapter_5_seq_file adapter_5.fasta --reference_genome genome.fasta -with-docker dnaseq-pipeline
 ```
 for this execution to work properly, you have to be in the current project directory.
 
