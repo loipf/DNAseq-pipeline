@@ -81,14 +81,13 @@ workflow {
 			.ifEmpty { error "cannot find any reads matching: ${params.reads}" }
 			.take( params.dev_samples )  // only consider a few files for debugging
 
-	channel_reads.view()
 	// DATA_ACQUISITION(params.data_dir, params.ensembl_release)  # STOREDIR DOES NOT WORK
 	CREATE_BWA_INDEX(params.reference_genome)
 	PREPROCESS_READS(channel_reads, params.num_threads, params.adapter_3_seq_file, params.adapter_5_seq_file)
 	channel_reads_prepro = PREPROCESS_READS.out.reads_prepro.map{ it -> tuple(it[0], tuple(it[1], it[2])) }
 
-	FASTQC_READS_RAW(channel_reads, params.num_threads, params.adapter_seq_file)
-	FASTQC_READS_PREPRO(channel_reads_prepro, params.num_threads, params.adapter_seq_file)
+	FASTQC_READS_RAW(channel_reads, params.num_threads,  params.adapter_3_seq_file, params.adapter_5_seq_file)
+	FASTQC_READS_PREPRO(channel_reads_prepro, params.num_threads, params.adapter_3_seq_file, params.adapter_5_seq_file)
 
 	MAPPING_BWA(channel_reads_prepro, params.num_threads, params.reference_genome, CREATE_BWA_INDEX.out.bwa_index.collect())
 

@@ -88,7 +88,8 @@ process FASTQC_READS_RAW {
 	input:
 		tuple val(sample_id), path(reads) 
 		val num_threads
-		path adapter_seq
+		path adapter_3_seq_file
+		path adapter_5_seq_file
 
 	output:
 		path "*.zip", emit: reports
@@ -96,7 +97,10 @@ process FASTQC_READS_RAW {
 
 	shell:
 	'''
-	fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads}
+	cat !{dapter_3_seq_file} !{dapter_5_seq_file} > adapter_both.fasta
+	awk 'BEGIN{RS=">";OFS="\t"}NR>1{print $1,$2}' adapter_both.fasta > adapter_both.txt
+
+	fastqc -a adapter_both.txt -t !{num_threads} --noextract !{reads}
 	'''
 }
 
@@ -109,7 +113,8 @@ process FASTQC_READS_PREPRO {
 	input:
 		tuple val(sample_id), path(reads_prepro) 
 		val num_threads
-		path adapter_seq
+		path adapter_3_seq_file
+		path adapter_5_seq_file
 
 	output:
 		path "*.zip", emit: reports
@@ -117,7 +122,10 @@ process FASTQC_READS_PREPRO {
 
 	shell:
 	'''
-	fastqc -a !{adapter_seq} -t !{num_threads} --noextract !{reads_prepro}
+	cat !{dapter_3_seq_file} !{dapter_5_seq_file} > adapter_both.fasta
+	awk 'BEGIN{RS=">";OFS="\t"}NR>1{print $1,$2}' adapter_both.fasta > adapter_both.txt
+
+	fastqc -a adapter_both.txt -t !{num_threads} --noextract !{reads_prepro}
 	'''
 }
 
