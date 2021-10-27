@@ -97,7 +97,7 @@ process FASTQC_READS_RAW {
 
 	shell:
 	'''
-	cat !{dapter_3_seq_file} !{dapter_5_seq_file} > adapter_both.fasta
+	cat !{adapter_3_seq_file} !{adapter_5_seq_file} > adapter_both.fasta
 	awk 'BEGIN{RS=">";OFS="\t"}NR>1{print $1,$2}' adapter_both.fasta > adapter_both.txt
 
 	fastqc -a adapter_both.txt -t !{num_threads} --noextract !{reads}
@@ -122,7 +122,7 @@ process FASTQC_READS_PREPRO {
 
 	shell:
 	'''
-	cat !{dapter_3_seq_file} !{dapter_5_seq_file} > adapter_both.fasta
+	cat !{adapter_3_seq_file} !{adapter_5_seq_file} > adapter_both.fasta
 	awk 'BEGIN{RS=">";OFS="\t"}NR>1{print $1,$2}' adapter_both.fasta > adapter_both.txt
 
 	fastqc -a adapter_both.txt -t !{num_threads} --noextract !{reads_prepro}
