@@ -67,8 +67,8 @@ process PREPROCESS_READS {
 	reads_sorted=$(echo !{reads} | xargs -n1 | sort | xargs)
 
 	### combine multiple seq files in the same sample directory with same direction together
-	reads_sorted_1=$(find $reads_sorted -name "*_1.fq.gz" -o -name "*_1.fastq.gz")
-	reads_sorted_2=$(find $reads_sorted -name "*_2.fq.gz" -o -name "*_2.fastq.gz")
+	reads_sorted_1=$(find $reads_sorted -name "*1.fq.gz" -o -name "*1.fastq.gz")
+	reads_sorted_2=$(find $reads_sorted -name "*2.fq.gz" -o -name "*2.fastq.gz")
 	cat $reads_sorted_1 > !{sample_id}_raw_reads_connected_1.fastq.gz
 	cat $reads_sorted_2 > !{sample_id}_raw_reads_connected_2.fastq.gz
 
