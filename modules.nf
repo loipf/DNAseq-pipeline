@@ -72,7 +72,9 @@ process PREPROCESS_READS {
 	cat $reads_sorted_1 > !{sample_id}_raw_reads_connected_1.fastq.gz
 	cat $reads_sorted_2 > !{sample_id}_raw_reads_connected_2.fastq.gz
 
-	cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any --minimum-length 10 -a $ADAPTER_3 -A $ADAPTER_5 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{sample_id}_raw_reads_connected_1.fastq.gz !{sample_id}_raw_reads_connected_2.fastq.gz > !{sample_id}_cutadapt_output.txt
+	#cutadapt --cores=!{num_threads} --max-n 0.1 --discard-trimmed --pair-filter=any --minimum-length 10 -a $ADAPTER_3 -A $ADAPTER_5 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{sample_id}_raw_reads_connected_1.fastq.gz !{sample_id}_raw_reads_connected_2.fastq.gz > !{sample_id}_cutadapt_output.txt
+	
+	cutadapt --cores=!{num_threads} --max-n 0.1 --pair-filter=any --minimum-length 10 -a $ADAPTER_3 -A $ADAPTER_5 -o !{sample_id}_prepro_1.fastq.gz -p !{sample_id}_prepro_2.fastq.gz !{sample_id}_raw_reads_connected_1.fastq.gz !{sample_id}_raw_reads_connected_2.fastq.gz > !{sample_id}_cutadapt_output.txt
 	'''
 }
 
